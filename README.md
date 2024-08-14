@@ -5,7 +5,7 @@
 
 - 代码下载：https://github.com/hpcaitech/Open-Sora
 - 安装：https://github.com/hpcaitech/Open-Sora/blob/main/docs/zh_CN/README.md
-- 环境依赖：`torch==2.1.2`, `torchvision==0.16.2`, `transformers==4.37.1`, `apex==0.1`等。
+- 环境依赖：`torch==2.1.2`, `torchvision==0.16.2`, `transformers==4.39.1`, `apex==0.1`等。
   
   `apex`版本需要与`transformers`版本对应才可以正确安装`apex.optimizers.FusedAdam`扩展，安装过程中需保证torch版本与cuda版本一致。
 ```bash
@@ -13,6 +13,7 @@ git clone https://github.com/NVIDIA/apex
 cd apex
 # 将apex版本回退回23.05
 git checkout 0da3ffb92ee6fbe5336602f0e3989db1cd16f880
+# 如果是集群则需要提交至计算节点安装
 pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
 ```
 - 模型权重：
@@ -63,7 +64,7 @@ model = dict(
     from_pretrained="/mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-STDiT-v3",
     qk_norm=True,
     enable_flash_attn=True,
-    enable_layernorm_kernel=False,
+    enable_layernorm_kernel=True,
 )
 vae = dict(
     type="OpenSoraVAE_V1_2",
@@ -107,10 +108,8 @@ python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
 
 日志参考：
 ```
-/mnt/lustrenew/dongkaixing1.vendor/.local.lazyllm2/lib/python3.10/site-packages/colossalai/shardformer/layer/normalization.py:45: UserWarning: Please install apex from source (https://github.com/NVIDIA/apex) to use the fused layernorm kernel
-  warnings.warn("Please install apex from source (https://github.com/NVIDIA/apex) to use the fused layernorm kernel")
-[2024-07-30 14:04:56,980] [INFO] [real_accelerator.py:158:get_accelerator] Setting ds_accelerator to cuda (auto detect)
-[2024-07-30 14:04:59] Inference configuration:
+[2024-08-14 16:19:56,070] [INFO] [real_accelerator.py:158:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-08-14 16:20:25] Inference configuration:
  {'aes': 6.5,
  'align': 5,
  'batch_size': 1,
@@ -122,7 +121,7 @@ python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
  'frame_interval': 1,
  'image_size': [1280, 720],
  'model': {'enable_flash_attn': True,
-           'enable_layernorm_kernel': False,
+           'enable_layernorm_kernel': True,
            'from_pretrained': '/mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-STDiT-v3',
            'qk_norm': True,
            'type': 'STDiT3-XL/2'},
@@ -144,13 +143,13 @@ python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
          'micro_batch_size': 4,
          'micro_frame_size': 17,
          'type': 'OpenSoraVAE_V1_2'}}
-[2024-07-30 14:04:59] Building models...
+[2024-08-14 16:20:25] Building models...
 Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]/mnt/cachenew/share/platform/env/miniconda3.10/envs/lazyllm2/lib/python3.10/site-packages/torch/_utils.py:831: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
   return self.fget.__get__(instance, owner)()
-Loading checkpoint shards: 100%|██████████| 2/2 [00:56<00:00, 28.27s/it]
-[2024-07-30 14:06:05] Model checkpoint loaded from /mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-VAE-v1.2
-[2024-07-30 14:06:41] Model checkpoint loaded from /mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-STDiT-v3
-100%|██████████| 1/1 [02:12<00:00, 132.47s/it]
-[2024-07-30 14:08:54] Inference finished.
-[2024-07-30 14:08:54] Saved 1 samples to ./samples/samples/
+Loading checkpoint shards: 100%|██████████| 2/2 [00:59<00:00, 29.98s/it]
+[2024-08-14 16:22:23] Model checkpoint loaded from /mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-VAE-v1.2
+[2024-08-14 16:24:57] Model checkpoint loaded from /mnt/lustrenew/share_data/PAT/datasets/huggingface/OpenSora-STDiT-v3
+100%|██████████| 1/1 [02:12<00:00, 132.90s/it]
+[2024-08-14 16:27:13] Inference finished.
+[2024-08-14 16:27:13] Saved 1 samples to ./samples/samples/
 ```
